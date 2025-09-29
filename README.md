@@ -11,6 +11,14 @@ It adds a bit of QoL updates and more features.
 ## Anti-Cheat
 - Using this mod will disable internal & Steam achievements, as well as uploading leaderboard scores.
 
+## WIP
+This mod is in an early stage. Expect features to be not fully implemented and buggy.
+
+## To-do
+- Scale enemies off of additional weapon & tome slots
+- Implement toggles for the harmony patches so the features can actually be turned off and on
+- Implement other QoL features such as longer stage times, etc.
+
 ## Installation
 1. Install [MelonLoader](https://github.com/LavaGang/MelonLoader.Installer/blob/master/README.md)
 2. Download the [latest release](https://github.com/lasagnaoasis/Omegabonk/releases/latest/download/Omegabonk.dll)
