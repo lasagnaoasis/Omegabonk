@@ -1,0 +1,39 @@
+Megabonk UI Structure
+
+HUD
+GameUI - GameObject
+    UIManager - Component
+    GameUI - GameObject
+        HUD - GameObject
+            Top - GameObject
+                Inventory - GameObject
+                    InventoryHud - Component
+                    Weapons - GameObject
+                        ItemContainer(Clone) - GameObject
+                            InventoryItemPrefabUI - Component
+                            Icon - GameObject
+                            LockedOverlay - GameObject
+                            T_Level - GameObject
+                    Tomes - GameObject
+                        ItemContainer(Clone) - GameObject
+                            InventoryItemPrefabUI - Component
+                            Icon - GameObject
+                            LockedOverlay - GameObject
+                            T_Level - GameObject
+
+Main Menu UI
+UI - GameObject
+    MainMenu - Component
+    Tabs - GameObject
+        W_Shop - GameObject
+            Window - Component
+            ShopWindow - Component
+            WindowLayers - GameObject
+                Content - GameObject
+                    ScrollRect - GameObject
+                        Content - GameObject
+                            ShopContainer - GameObject
+                                ShopContainer - Component
+                                MyButtonShop - Component
+                                Levels - GameObject
+                                    Image - GameObject
