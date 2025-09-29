@@ -11,14 +11,13 @@ using System.Collections.Concurrent;
 
 using UnityEngine;
 
-[assembly: MelonInfo(typeof(Omegabonk.Core), "Omegabonk", "0.1.0", "skatinglasagna", null)]
+[assembly: MelonInfo(typeof(Omegabonk.Core), "Omegabonk", "0.1.1", "skatinglasagna", null)]
 [assembly: MelonGame("Ved", "Megabonk")]
 
-namespace Omegabonk
-{
-    public class Core : MelonMod
-    {
+namespace Omegabonk {
+    public class Core : MelonMod {
         internal static Core Instance;
+
         private ConcurrentQueue<Action> _actionQueue = new ConcurrentQueue<Action>();
 
         public override void OnEarlyInitializeMelon() {
@@ -27,17 +26,17 @@ namespace Omegabonk
             Preferences.Setup();
         }
 
-        public override void OnInitializeMelon() {
-            
-        }
+        //public override void OnInitializeMelon() {
 
-        public override void OnLateInitializeMelon() {
-            
-        }
+        //}
 
-        public override void OnSceneWasLoaded(int buildIndex, string sceneName) {
-            
-        }
+        //public override void OnLateInitializeMelon() {
+
+        //}
+
+        //public override void OnSceneWasLoaded(int buildIndex, string sceneName) {
+
+        //}
 
         public override void OnSceneWasInitialized(int buildIndex, string sceneName) {
             switch (buildIndex) {
@@ -56,33 +55,32 @@ namespace Omegabonk
         }
 
         private void OnBootInitialized() {
-            
+
         }
 
         private void OnMainMenuInitialized() {
             DisableSteamAchievements.Enable();
-            if (Preferences.EnableBetterMinimap.Value)
+            if (MoreTomeAndWeaponSlots.Enabled)
                 MoreTomeAndWeaponSlots.OnMainMenuInitialized();
         }
 
         private void OnLevelInitialized() {
-            if (Preferences.EnableBetterMinimap.Value)
+            if (BetterMinimap.Enabled)
                 BetterMinimap.OnLevelInitialized();
-            if (Preferences.EnableBetterMinimap.Value)
+            if (MoreTomeAndWeaponSlots.Enabled)
                 MoreTomeAndWeaponSlots.OnLevelInitialized();
 
-            MelonCoroutines.Start(DelayedOnLevelInitialized());
-            
+            //MelonCoroutines.Start(DelayedOnLevelInitialized());
         }
 
-        private IEnumerator DelayedOnLevelInitialized() {
-            yield return new WaitForSeconds(5f);
+        //private IEnumerator DelayedOnLevelInitialized() {
+        //    yield return new WaitForSeconds(5f);
 
 
-        }
+        //}
 
         public override void OnSceneWasUnloaded(int buildIndex, string sceneName) {
-            
+
         }
 
         public override void OnUpdate() {
@@ -97,7 +95,7 @@ namespace Omegabonk
         }
 
         public override void OnDeinitializeMelon() {
-            
+
         }
 
         internal void EnqueueAction(Action action) {

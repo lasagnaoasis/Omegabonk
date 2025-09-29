@@ -27,15 +27,17 @@ internal static class MoreTomeAndWeaponSlots {
     private static int OriginalMaxTomeSlots { get; set; }
     private static int OriginalMaxWeaponSlots { get; set; }
 
+    internal static bool Enabled => Preferences.EnableMoreTomesAndWeapons.Value;
     private static int AdditionalTomeSlots => Preferences.AdditionalTomeSlots.Value;
     private static int AdditionalWeaponSlots => Preferences.AdditionalWeaponSlots.Value;
+
 
     //private static void Postfix(ref int __result) {
     //    __result = _maxTomeSlots;
     //}
 
     internal static void Enable() {
-        
+
     }
 
     internal static void Disable() {
@@ -43,45 +45,10 @@ internal static class MoreTomeAndWeaponSlots {
     }
 
     internal static void OnMainMenuInitialized() {
-        
+
     }
 
     internal static void OnLevelInitialized() {
-        MelonCoroutines.Start(DelayedEditGameUi());
-    }
-
-    private static IEnumerator DelayedEditGameUi() {
-        UiManager uiManager = null;
-        var maxWait = 150;
-        while (maxWait > 0) {
-            uiManager = GameObject.FindFirstObjectByType<UiManager>();
-            if (uiManager != null)
-                break;
-
-            yield return new WaitForSeconds(0.1f);
-
-            maxWait--;
-        }
-
-        if (uiManager == null) {
-            MelonLogger.Error($"[{nameof(MoreTomeAndWeaponSlots)}.{nameof(DelayedEditGameUi)}] Failed to find UiManager!");
-            yield break;
-        }
-
-        var gameUiGameObject = uiManager.gameObject;
-        var hudGameObject = uiManager.hud;
-
-        if (hudGameObject == null) {
-            MelonLogger.Error($"[{nameof(MoreTomeAndWeaponSlots)}.{nameof(DelayedEditGameUi)}] Failed to find HUD!");
-            yield break;
-        }
-
-        var inventoryHud = hudGameObject.GetComponentInChildren<InventoryHud>(true);
-        if (inventoryHud == null) {
-            MelonLogger.Error($"[{nameof(MoreTomeAndWeaponSlots)}.{nameof(DelayedEditGameUi)}] Failed to find InventoryHud!");
-            yield break;
-        }
-
 
     }
 
@@ -89,6 +56,9 @@ internal static class MoreTomeAndWeaponSlots {
     [HarmonyPatch(typeof(DataManager), nameof(DataManager.Load), new Type[] { })]
     internal static class EditDataManagerPatch {
         private static void Postfix(DataManager __instance) {
+            if (!Enabled)
+                return;
+
             var shopItems = __instance.shopItems;
             foreach (var shopItem in shopItems) {
                 var eShopItem = shopItem.Key;
@@ -139,6 +109,9 @@ internal static class MoreTomeAndWeaponSlots {
     [HarmonyPatch(typeof(ShopWindow), nameof(ShopWindow.Start), new Type[] { })]
     internal static class EditShopWindowPatch2 {
         private static void Postfix(ShopWindow __instance) {
+            if (!Enabled)
+                return;
+
             MelonLogger.Msg($"[{nameof(MoreTomeAndWeaponSlots)}.{nameof(EditShopWindowPatch2)}.{nameof(Postfix)}] ShopWindow Start");
 
             MelonCoroutines.Start(DelayedStart(__instance));
@@ -250,6 +223,9 @@ internal static class MoreTomeAndWeaponSlots {
     [HarmonyPatch(typeof(InventoryHud), nameof(InventoryHud.Start), new Type[] { })]
     internal static class EditInventoryHudPatch2 {
         private static void Postfix(InventoryHud __instance) {
+            if (!Enabled)
+                return;
+
             MelonLogger.Msg($"[{nameof(MoreTomeAndWeaponSlots)}.{nameof(EditInventoryHudPatch2)}.{nameof(Postfix)}] InventoryHud Start");
 
             MelonCoroutines.Start(DelayedStart(__instance));
@@ -309,10 +285,15 @@ internal static class MoreTomeAndWeaponSlots {
 
                 weaponContainers.Add(weaponInventoryItemPrefabUi);
 
-                instance.Refresh();
-                weaponInventoryItemPrefabUi.RefreshEnabled(true);
-                instance.Refresh();
-                weaponInventoryItemPrefabUi.RefreshEnabled(true);
+                for (int x = 0; x < 2; x++) {
+                    try {
+                        instance.Refresh();
+
+                        weaponInventoryItemPrefabUi.RefreshEnabled(true);
+                    } catch {
+
+                    }
+                }
 
                 if (lockedWeaponSlots > 0 && i >= (AdditionalWeaponSlots - lockedWeaponSlots)) {
                     var lockedOverlayTransform = newWeaponSlot.transform.Find("LockedOverlay");
@@ -321,7 +302,8 @@ internal static class MoreTomeAndWeaponSlots {
                         continue;
                     }
 
-                    lockedOverlayTransform.gameObject.SetActive(true);
+                    //lockedOverlayTransform.gameObject.SetActive(true);
+                    weaponInventoryItemPrefabUi.SetUnavailable();
 
                     lockedWeaponSlots--;
                 }
@@ -340,19 +322,145 @@ internal static class MoreTomeAndWeaponSlots {
 
                 tomeContainers.Add(tomeInventoryItemPrefabUi);
 
-                instance.Refresh();
-                tomeInventoryItemPrefabUi.RefreshEnabled(true);
-                instance.Refresh();
-                tomeInventoryItemPrefabUi.RefreshEnabled(true);
+                for (int y = 0; y < 2; y++) {
+                    try {
+                        instance.Refresh();
+
+                        tomeInventoryItemPrefabUi.RefreshEnabled(true);
+                    } catch {
+
+                    }
+                }
 
                 if (lockedTomeSlots > 0 && j >= (AdditionalTomeSlots - lockedTomeSlots)) {
-                    var lockedOverlayTransform = newTomeSlot.transform.Find("LockedOverlay");
-                    if (lockedOverlayTransform == null) {
-                        MelonLogger.Error($"[{nameof(MoreTomeAndWeaponSlots)}.{nameof(EditInventoryHudPatch2)}.{nameof(DelayedStart)}] T LockedOverlayTransform null!");
-                        continue;
-                    }
+                    //var lockedOverlayTransform = newTomeSlot.transform.Find("LockedOverlay");
+                    //if (lockedOverlayTransform == null) {
+                    //    MelonLogger.Error($"[{nameof(MoreTomeAndWeaponSlots)}.{nameof(EditInventoryHudPatch2)}.{nameof(DelayedStart)}] T LockedOverlayTransform null!");
+                    //    continue;
+                    //}
 
-                    lockedOverlayTransform.gameObject.SetActive(true);
+                    //lockedOverlayTransform.gameObject.SetActive(true);
+                    tomeInventoryItemPrefabUi.SetUnavailable();
+
+                    lockedTomeSlots--;
+                }
+            }
+        }
+    }
+
+    //void UpgradeInventoryUI.Start()
+    [HarmonyPatch(typeof(UpgradeInventoryUI), nameof(UpgradeInventoryUI.OnEnable), new Type[] { })]
+    internal static class EditUpgradeInventoryUiPatch1 {
+        private static void Postfix(UpgradeInventoryUI __instance) {
+            if (!Enabled)
+                return;
+
+            MelonLogger.Msg($"[{nameof(MoreTomeAndWeaponSlots)}.{nameof(EditUpgradeInventoryUiPatch1)}.{nameof(Postfix)}] UpgradeInventoryUI OnEnable");
+
+            MelonCoroutines.Start(DelayedOnEnable(__instance));
+        }
+
+        private static IEnumerator DelayedOnEnable(UpgradeInventoryUI instance) {
+            yield return new WaitForEndOfFrame();
+
+            var weaponContainers = instance.weaponContainers;
+            if (weaponContainers is not { Count: > 0 }) {
+                MelonLogger.Error($"[{nameof(MoreTomeAndWeaponSlots)}.{nameof(EditUpgradeInventoryUiPatch1)}.{nameof(DelayedOnEnable)}] UpgradeInventoryUI WeaponContainers null or empty!");
+                yield break;
+            }
+
+            if (weaponContainers.Count >= (4 + AdditionalWeaponSlots))
+                yield break;
+
+            var weaponsParentTransform = instance.weaponParent;
+            if (weaponsParentTransform == null) {
+                MelonLogger.Error($"[{nameof(MoreTomeAndWeaponSlots)}.{nameof(EditUpgradeInventoryUiPatch1)}.{nameof(DelayedOnEnable)}] UpgradeInventoryUI WeaponsParentTransform null!");
+                yield break;
+            }
+
+            GameObject itemContainerPrefab = null;
+            foreach (var childTransformObject in weaponsParentTransform) {
+                var childTransform = childTransformObject.Cast<Transform>();
+                var childGameObject = childTransform.gameObject;
+                var childInventoryItemPrefabUi = childGameObject.GetComponent<InventoryItemPrefabUI>();
+                if (childGameObject.activeSelf && childInventoryItemPrefabUi != null && childInventoryItemPrefabUi.item == null) {
+                    itemContainerPrefab = childGameObject;
+                    break;
+                }
+            }
+
+            if (itemContainerPrefab == null) {
+                MelonLogger.Error($"[{nameof(MoreTomeAndWeaponSlots)}.{nameof(EditUpgradeInventoryUiPatch1)}.{nameof(DelayedOnEnable)}] ItemContainerPrefab null!");
+                yield break;
+            }
+
+            var lockedWeaponSlots = DataManager.Instance.shopItems[EShopItem.Weapons].GetMaxLevel() - SaveManager.Instance.progression.shopItems[EShopItem.Weapons];
+            for (int i = 0; i < AdditionalWeaponSlots; i++) {
+                var newWeaponSlot = GameObject.Instantiate(itemContainerPrefab, weaponsParentTransform);
+                newWeaponSlot.SetActive(true);
+
+                var weaponInventoryItemPrefabUi = newWeaponSlot.GetComponent<InventoryItemPrefabUI>();
+                if (weaponInventoryItemPrefabUi == null) {
+                    MelonLogger.Error($"[{nameof(MoreTomeAndWeaponSlots)}.{nameof(EditUpgradeInventoryUiPatch1)}.{nameof(DelayedOnEnable)}] W InventoryItemPrefabUI null!");
+                    yield break;
+                }
+
+                weaponContainers.Add(weaponInventoryItemPrefabUi);
+
+                for (int x = 0; x < 2; x++) {
+                    try {
+                        instance.Refresh();
+
+                        weaponInventoryItemPrefabUi.RefreshEnabled(true);
+                    } catch {
+
+                    }
+                }
+
+                if (lockedWeaponSlots > 0 && i >= (AdditionalWeaponSlots - lockedWeaponSlots)) {
+                    weaponInventoryItemPrefabUi.SetUnavailable();
+
+                    lockedWeaponSlots--;
+                }
+            }
+
+            var tomeContainers = instance.tomeContainers;
+            if (tomeContainers is not { Count: > 0 }) {
+                MelonLogger.Error($"[{nameof(MoreTomeAndWeaponSlots)}.{nameof(EditUpgradeInventoryUiPatch1)}.{nameof(DelayedOnEnable)}] UpgradeInventoryUI TomeContainers null or empty!");
+                yield break;
+            }
+
+            var tomesParentTransform = instance.tomeParent;
+            if (tomesParentTransform == null) {
+                MelonLogger.Error($"[{nameof(MoreTomeAndWeaponSlots)}.{nameof(EditUpgradeInventoryUiPatch1)}.{nameof(DelayedOnEnable)}] UpgradeInventoryUI TomesParentTransform null!");
+                yield break;
+            }
+
+            var lockedTomeSlots = DataManager.Instance.shopItems[EShopItem.Tomes].GetMaxLevel() - SaveManager.Instance.progression.shopItems[EShopItem.Tomes];
+            for (int j = 0; j < AdditionalTomeSlots; j++) {
+                var newTomeSlot = GameObject.Instantiate(itemContainerPrefab, tomesParentTransform);
+                newTomeSlot.SetActive(true);
+
+                var tomeInventoryItemPrefabUi = newTomeSlot.GetComponent<InventoryItemPrefabUI>();
+                if (tomeInventoryItemPrefabUi == null) {
+                    MelonLogger.Error($"[{nameof(MoreTomeAndWeaponSlots)}.{nameof(EditUpgradeInventoryUiPatch1)}.{nameof(DelayedOnEnable)}] T InventoryItemPrefabUI null!");
+                    yield break;
+                }
+
+                tomeContainers.Add(tomeInventoryItemPrefabUi);
+
+                for (int y = 0; y < 2; y++) {
+                    try {
+                        instance.Refresh();
+
+                        tomeInventoryItemPrefabUi.RefreshEnabled(true);
+                    } catch {
+
+                    }
+                }
+
+                if (lockedTomeSlots > 0 && j >= (AdditionalTomeSlots - lockedTomeSlots)) {
+                    tomeInventoryItemPrefabUi.SetUnavailable();
 
                     lockedTomeSlots--;
                 }
@@ -364,6 +472,9 @@ internal static class MoreTomeAndWeaponSlots {
     [HarmonyPatch(typeof(ShopItemData), nameof(ShopItemData.GetMaxLevel), new Type[] { })]
     internal static class EditShopItemDataPatch1 {
         private static void Postfix(ShopItemData __instance, ref int __result) {
+            if (!Enabled)
+                return;
+
             MelonLogger.Msg($"[{nameof(MoreTomeAndWeaponSlots)}.{nameof(EditShopItemDataPatch1)}.{nameof(Postfix)}] ShopItemData GetMaxLevel");
 
             var eShopItem = __instance.eShopItem;
@@ -392,6 +503,9 @@ internal static class MoreTomeAndWeaponSlots {
     [HarmonyPatch(typeof(ShopItemData), nameof(ShopItemData.IsMaxLevel), new Type[] { })]
     internal static class EditShopItemDataPatch2 {
         private static void Postfix(ShopItemData __instance, ref bool __result) {
+            if (!Enabled)
+                return;
+
             MelonLogger.Msg($"[{nameof(MoreTomeAndWeaponSlots)}.{nameof(EditShopItemDataPatch1)}.{nameof(Postfix)}] ShopItemData GetMaxLevel");
 
             var saveManager = SaveManager.Instance;

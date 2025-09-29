@@ -16,10 +16,14 @@ using UnityEngine;
 namespace Omegabonk.Tweaks;
 
 internal static class BetterMinimap {
+    internal static bool Enabled => Preferences.EnableBetterMinimap.Value;
     private static float MinimapScale => Preferences.MinimapScale.Value;
     private static float MinimapZoom => Preferences.MinimapZoom.Value;
 
     internal static void OnLevelInitialized() {
+        if (!Enabled)
+            return;
+
         MelonCoroutines.Start(DelayedEditMinimapUi());
         MelonCoroutines.Start(DelayedEditMinimapCamera());
     }

@@ -15,14 +15,6 @@ using static Omegabonk.Tweaks.MoreTomeAndWeaponSlots;
 
 namespace Omegabonk.Tweaks;
 
-//bool MyAchievements.AreAchievementsDisabled()
-//[HarmonyPatch(typeof(MyAchievements), nameof(MyAchievements.AreAchievementsDisabled), new Type[] { })]
-internal static class DisableInternalAchievements1 {
-    private static void Postfix(ref bool __result) {
-        __result = true;
-    }
-}
-
 //bool MyAchievements.TryUnlock(string unlockName)
 [HarmonyPatch(typeof(MyAchievements), nameof(MyAchievements.TryUnlock), new Type[] { typeof(string) })]
 internal static class DisableInternalAchievements2 {
