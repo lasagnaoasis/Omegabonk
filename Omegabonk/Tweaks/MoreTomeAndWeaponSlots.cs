@@ -314,7 +314,7 @@ internal static class MoreTomeAndWeaponSlots {
                 instance.Refresh();
                 weaponInventoryItemPrefabUi.RefreshEnabled(true);
 
-                if (lockedWeaponSlots > 0) {
+                if (lockedWeaponSlots > 0 && i >= (AdditionalWeaponSlots - lockedWeaponSlots)) {
                     var lockedOverlayTransform = newWeaponSlot.transform.Find("LockedOverlay");
                     if (lockedOverlayTransform == null) {
                         MelonLogger.Error($"[{nameof(MoreTomeAndWeaponSlots)}.{nameof(EditInventoryHudPatch2)}.{nameof(DelayedStart)}] W LockedOverlayTransform null!");
@@ -345,7 +345,7 @@ internal static class MoreTomeAndWeaponSlots {
                 instance.Refresh();
                 tomeInventoryItemPrefabUi.RefreshEnabled(true);
 
-                if (lockedTomeSlots > 0) {
+                if (lockedTomeSlots > 0 && j >= (AdditionalTomeSlots - lockedTomeSlots)) {
                     var lockedOverlayTransform = newTomeSlot.transform.Find("LockedOverlay");
                     if (lockedOverlayTransform == null) {
                         MelonLogger.Error($"[{nameof(MoreTomeAndWeaponSlots)}.{nameof(EditInventoryHudPatch2)}.{nameof(DelayedStart)}] T LockedOverlayTransform null!");
