@@ -11,7 +11,7 @@ using System.Collections.Concurrent;
 
 using UnityEngine;
 
-[assembly: MelonInfo(typeof(Omegabonk.Core), "Omegabonk", "1.0.0", "skatinglasagna", null)]
+[assembly: MelonInfo(typeof(Omegabonk.Core), "Omegabonk", "0.1.0", "skatinglasagna", null)]
 [assembly: MelonGame("Ved", "Megabonk")]
 
 namespace Omegabonk
