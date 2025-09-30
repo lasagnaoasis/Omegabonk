@@ -1,6 +1,7 @@
 ﻿using Il2Cpp;
 
 using Il2CppAssets.Scripts.Actors.Player;
+using Il2CppAssets.Scripts.Managers;
 
 using MelonLoader;
 
@@ -11,7 +12,7 @@ using System.Collections.Concurrent;
 
 using UnityEngine;
 
-[assembly: MelonInfo(typeof(Omegabonk.Core), "Omegabonk", "0.1.1", "skatinglasagna", null)]
+[assembly: MelonInfo(typeof(Omegabonk.Core), "Omegabonk", "0.1.2", "skatinglasagna", null)]
 [assembly: MelonGame("Ved", "Megabonk")]
 
 namespace Omegabonk {
@@ -59,25 +60,29 @@ namespace Omegabonk {
         }
 
         private void OnMainMenuInitialized() {
-            DisableSteamAchievements.Enable();
+            //DisableSteamAchievements.Enable();
+
             if (MoreTomeAndWeaponSlots.Enabled)
                 MoreTomeAndWeaponSlots.OnMainMenuInitialized();
+
+            //if (BetterEnemyScaling.Enabled) {
+            //    EnemyManager.maxNumEnemiesPooled = BetterEnemyScaling.MaxNumberOfEnemiesPooled;
+            //}
         }
 
         private void OnLevelInitialized() {
             if (BetterMinimap.Enabled)
                 BetterMinimap.OnLevelInitialized();
+
             if (MoreTomeAndWeaponSlots.Enabled)
                 MoreTomeAndWeaponSlots.OnLevelInitialized();
 
             //MelonCoroutines.Start(DelayedOnLevelInitialized());
         }
 
-        //private IEnumerator DelayedOnLevelInitialized() {
-        //    yield return new WaitForSeconds(5f);
-
-
-        //}
+        private IEnumerator DelayedOnLevelInitialized() {
+            yield return new WaitForSeconds(5f);
+        }
 
         public override void OnSceneWasUnloaded(int buildIndex, string sceneName) {
 
