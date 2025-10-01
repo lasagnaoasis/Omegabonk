@@ -47,7 +47,7 @@ internal static class Preferences {
 
     internal static MelonPreferences_Entry<bool> DisableSteamLeaderboardUpload;
 
-    internal static MelonPreferences_Entry<bool> EnableBetterEnemyScaling;
+    internal static MelonPreferences_Entry<bool> EnableAdvancedEnemyScaling;
     internal static MelonPreferences_Entry<int> MaxNumberOfEnemiesPooled;
     internal static MelonPreferences_Entry<int> MaxNumberOfEnemies;
 
@@ -77,7 +77,7 @@ internal static class Preferences {
 
         DisableSteamLeaderboardUpload = OmegabonkCategory.CreateEntry("DisableSteamLeaderboardUpload", true, description: "Disables uploading scores to the Steam Leaderboards (anti-cheat)");
 
-        EnableBetterEnemyScaling = OmegabonkCategory.CreateEntry("EnableBetterEnemyScaling", true, description: "Enables better enemy scaling");
+        EnableAdvancedEnemyScaling = OmegabonkCategory.CreateEntry("EnableAdvancedEnemyScaling", false, description: "Enables enemy scaling from inbuilt tweaks suchs as more weapon/tome slots");
         MaxNumberOfEnemiesPooled = OmegabonkCategory.CreateEntry("MaxNumberOfEnemiesPooled", 2500, description: "Maximum number of enemies pooled (500 - 2500)", validator: new ValueRange<int>(500, 2500));
         MaxNumberOfEnemies = OmegabonkCategory.CreateEntry("MaxNumberOfEnemies", 1250, description: "Maximum number of enemies (250 - 1000)", validator: new ValueRange<int>(250, 1250));
 
