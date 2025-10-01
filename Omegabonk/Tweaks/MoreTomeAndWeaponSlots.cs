@@ -275,8 +275,11 @@ internal static class MoreTomeAndWeaponSlots {
             }
 
             if (itemContainerPrefab == null) {
-                MelonLogger.Error($"[{nameof(MoreTomeAndWeaponSlots)}.{nameof(EditInventoryHudPatch2)}.{nameof(DelayedStart)}] ItemContainerPrefab null!");
-                yield break;
+                itemContainerPrefab = instance.itemContainerPrefab; //Fallback
+                if (itemContainerPrefab == null) {
+                    MelonLogger.Error($"[{nameof(MoreTomeAndWeaponSlots)}.{nameof(EditInventoryHudPatch2)}.{nameof(DelayedStart)}] ItemContainerPrefab null!");
+                    yield break;
+                }
             }
 
             var lockedWeaponSlots = DataManager.Instance.shopItems[EShopItem.Weapons].GetMaxLevel() - SaveManager.Instance.progression.shopItems[EShopItem.Weapons];
@@ -397,8 +400,11 @@ internal static class MoreTomeAndWeaponSlots {
             }
 
             if (itemContainerPrefab == null) {
-                MelonLogger.Error($"[{nameof(MoreTomeAndWeaponSlots)}.{nameof(EditUpgradeInventoryUiPatch1)}.{nameof(DelayedOnEnable)}] ItemContainerPrefab null!");
-                yield break;
+                itemContainerPrefab = instance.itemContainerPrefab; //Fallback
+                if (itemContainerPrefab == null) {
+                    MelonLogger.Error($"[{nameof(MoreTomeAndWeaponSlots)}.{nameof(EditUpgradeInventoryUiPatch1)}.{nameof(DelayedOnEnable)}] ItemContainerPrefab null!");
+                    yield break;
+                }
             }
 
             var lockedWeaponSlots = DataManager.Instance.shopItems[EShopItem.Weapons].GetMaxLevel() - SaveManager.Instance.progression.shopItems[EShopItem.Weapons];
