@@ -16,10 +16,13 @@ internal static class Preferences {
     private const float MinMinimapZoom = 60f;
     private const float MaxMinimapZoom = 270f;
 
+    private const int MinAdditionalWeaponSlots = 0;
     private const int MaxAdditionalWeaponSlots = 3;
+    private const int MinAdditionalTomeSlots = 0;
     private const int MaxAdditionalTomeSlots = 3;
-
-    private const float MaxCameraDistanceVal = 15f;
+    
+    private const float DefaultMaxCameraDistance = 5f;
+    private const float NewMaxCameraDistance = 15f;
 
     internal static bool Initialized { get; private set; }
 
@@ -54,8 +57,8 @@ internal static class Preferences {
         MinimapZoom = OmegabonkCategory.CreateEntry("MinimapZoom", 160f, description: "Minimap zoom as FOV (60f - 270f)", validator: new ValueRange<float>(MinMinimapZoom, MaxMinimapZoom));
 
         EnableMoreTomesAndWeapons = OmegabonkCategory.CreateEntry("EnableMoreTomesAndWeapons", true, description: "Enables more tome and weapon slots in the inventory");
-        AdditionalWeaponSlots = OmegabonkCategory.CreateEntry("AdditionalWeaponSlots", 1, description: "Additional weapon slots (0 - 3)", validator: new ValueRange<int>(0, MaxAdditionalWeaponSlots));
-        AdditionalTomeSlots = OmegabonkCategory.CreateEntry("AdditionalTomeSlots", 1, description: "Additional tome slots (0 - 3)", validator: new ValueRange<int>(0, MaxAdditionalTomeSlots));
+        AdditionalWeaponSlots = OmegabonkCategory.CreateEntry("AdditionalWeaponSlots", 1, description: "Additional weapon slots (0 - 3)", validator: new ValueRange<int>(MinAdditionalWeaponSlots, MaxAdditionalWeaponSlots));
+        AdditionalTomeSlots = OmegabonkCategory.CreateEntry("AdditionalTomeSlots", 1, description: "Additional tome slots (0 - 3)", validator: new ValueRange<int>(MinAdditionalTomeSlots, MaxAdditionalTomeSlots));
 
         EnableCustomSteamRichPresence = OmegabonkCategory.CreateEntry("EnableCustomSteamRichPresence", false, description: "Enables custom Steam Rich Presence status");
         CustomSteamRichPresenceStatus = OmegabonkCategory.CreateEntry("CustomSteamRichPresenceStatus", new List<string> { "bonk bonk bonk", "I'M MEGABONKING" }, description: "Custom Steam Rich Presence status (at least 1 required)");
@@ -67,7 +70,7 @@ internal static class Preferences {
         MaxNumberOfEnemies = OmegabonkCategory.CreateEntry("MaxNumberOfEnemies", 1250, description: "Maximum number of enemies (250 - 1000)", validator: new ValueRange<int>(250, 1250));
 
         EnableBetterCamera = OmegabonkCategory.CreateEntry("EnableBetterCamera", true, description: "Enables you to zoom in & out with your mousewheel");
-        MaxCameraDistance = OmegabonkCategory.CreateEntry("MaxCameraDistance", 10f, description: $"Maximum camera distance (5f - {MaxCameraDistanceVal}f)", validator: new ValueRange<float>(5f, MaxCameraDistanceVal));
+        MaxCameraDistance = OmegabonkCategory.CreateEntry("MaxCameraDistance", 10f, description: $"Maximum camera distance ({DefaultMaxCameraDistance}f - {NewMaxCameraDistance}f)", validator: new ValueRange<float>(DefaultMaxCameraDistance, NewMaxCameraDistance));
         ScaleFOVBasedOnCameraDistance = OmegabonkCategory.CreateEntry("ScaleFOVBasedOnCameraDistance", true, description: "Scales FOV based on camera distance (max camera distance will slightly increase FOV)");
 
         Initialized = true;
