@@ -28,8 +28,8 @@ internal static class MoreTomeAndWeaponSlots {
     private static int OriginalMaxWeaponSlots { get; set; }
 
     internal static bool Enabled => Preferences.EnableMoreTomesAndWeapons.Value;
-    private static int AdditionalTomeSlots => Preferences.AdditionalTomeSlots.Value;
-    private static int AdditionalWeaponSlots => Preferences.AdditionalWeaponSlots.Value;
+    internal static int AdditionalTomeSlots => Preferences.AdditionalTomeSlots.Value;
+    internal static int AdditionalWeaponSlots => Preferences.AdditionalWeaponSlots.Value;
 
 
     //private static void Postfix(ref int __result) {
@@ -296,11 +296,11 @@ internal static class MoreTomeAndWeaponSlots {
                 }
 
                 if (lockedWeaponSlots > 0 && i >= (AdditionalWeaponSlots - lockedWeaponSlots)) {
-                    var lockedOverlayTransform = newWeaponSlot.transform.Find("LockedOverlay");
-                    if (lockedOverlayTransform == null) {
-                        MelonLogger.Error($"[{nameof(MoreTomeAndWeaponSlots)}.{nameof(EditInventoryHudPatch2)}.{nameof(DelayedStart)}] W LockedOverlayTransform null!");
-                        continue;
-                    }
+                    //var lockedOverlayTransform = newWeaponSlot.transform.Find("LockedOverlay");
+                    //if (lockedOverlayTransform == null) {
+                    //    MelonLogger.Error($"[{nameof(MoreTomeAndWeaponSlots)}.{nameof(EditInventoryHudPatch2)}.{nameof(DelayedStart)}] W LockedOverlayTransform null!");
+                    //    continue;
+                    //}
 
                     //lockedOverlayTransform.gameObject.SetActive(true);
                     weaponInventoryItemPrefabUi.SetUnavailable();

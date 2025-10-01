@@ -29,7 +29,7 @@ internal static class BetterMinimap {
     }
 
     private static IEnumerator DelayedEditMinimapCamera() {
-        int maxWait = 150;
+        var maxWait = 150;
         while (maxWait > 0) {
             var minimapCamera = GameObject.FindFirstObjectByType<MinimapCamera>();
             if (minimapCamera != null && minimapCamera.minimapCamera != null) {
@@ -44,7 +44,7 @@ internal static class BetterMinimap {
     }
 
     private static IEnumerator DelayedEditMinimapUi() {
-        int maxWait = 150;
+        var maxWait = 150;
         while (maxWait > 0) {
             var minimapUi = GameObject.FindFirstObjectByType<MinimapUi>();
             if (minimapUi != null) {

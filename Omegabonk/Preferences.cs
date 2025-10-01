@@ -14,7 +14,7 @@ internal static class Preferences {
     private const float MaxMinimapScale = 2f;
 
     private const float MinMinimapZoom = 60f;
-    private const float MaxMinimapZoom = 180f;
+    private const float MaxMinimapZoom = 270f;
 
     private const int MaxAdditionalWeaponSlots = 3;
     private const int MaxAdditionalTomeSlots = 3;
@@ -44,13 +44,14 @@ internal static class Preferences {
 
     internal static MelonPreferences_Entry<bool> EnableBetterCamera;
     internal static MelonPreferences_Entry<float> MaxCameraDistance;
+    internal static MelonPreferences_Entry<bool> ScaleFOVBasedOnCameraDistance;
 
     internal static void Setup() {
         OmegabonkCategory = MelonPreferences.CreateCategory("Omegabonk");
 
         EnableBetterMinimap = OmegabonkCategory.CreateEntry("EnableBetterMinimap", true, description: "Enables a bigger & more zoomed out minimap for better visibility");
         MinimapScale = OmegabonkCategory.CreateEntry("MinimapScale", 1.8f, description: "Minimap scale as unity units (1f - 2f)", validator: new ValueRange<float>(MinMinimapScale, MaxMinimapScale));
-        MinimapZoom = OmegabonkCategory.CreateEntry("MinimapZoom", 140f, description: "Minimap zoom as FOV (60f - 180f)", validator: new ValueRange<float>(MinMinimapZoom, MaxMinimapZoom));
+        MinimapZoom = OmegabonkCategory.CreateEntry("MinimapZoom", 160f, description: "Minimap zoom as FOV (60f - 270f)", validator: new ValueRange<float>(MinMinimapZoom, MaxMinimapZoom));
 
         EnableMoreTomesAndWeapons = OmegabonkCategory.CreateEntry("EnableMoreTomesAndWeapons", true, description: "Enables more tome and weapon slots in the inventory");
         AdditionalWeaponSlots = OmegabonkCategory.CreateEntry("AdditionalWeaponSlots", 1, description: "Additional weapon slots (0 - 3)", validator: new ValueRange<int>(0, MaxAdditionalWeaponSlots));
@@ -67,6 +68,7 @@ internal static class Preferences {
 
         EnableBetterCamera = OmegabonkCategory.CreateEntry("EnableBetterCamera", true, description: "Enables you to zoom in & out with your mousewheel");
         MaxCameraDistance = OmegabonkCategory.CreateEntry("MaxCameraDistance", 10f, description: $"Maximum camera distance (5f - {MaxCameraDistanceVal}f)", validator: new ValueRange<float>(5f, MaxCameraDistanceVal));
+        ScaleFOVBasedOnCameraDistance = OmegabonkCategory.CreateEntry("ScaleFOVBasedOnCameraDistance", true, description: "Scales FOV based on camera distance (max camera distance will slightly increase FOV)");
 
         Initialized = true;
     }
