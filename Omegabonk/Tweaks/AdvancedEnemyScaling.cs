@@ -110,7 +110,7 @@ internal static class AdvancedEnemyScaling {
             var additionalWeaponSlots = currentWeaponSlots - baseWeaponSlots;
             var additionalTomeSlots = currentTomeSlots - baseTomeSlots;
 
-            var baseMult = 0.1f;
+            var baseMult = 0.075f;
             return 1 + ((additionalWeaponSlots * baseMult) + (additionalTomeSlots * baseMult));
         }
 
@@ -126,7 +126,7 @@ internal static class AdvancedEnemyScaling {
             var additionalWeaponSlots = currentWeaponSlots - baseWeaponSlots;
             var additionalTomeSlots = currentTomeSlots - baseTomeSlots;
 
-            var baseMult = 0.075f;
+            var baseMult = 0.05f;
             return 1 + ((additionalWeaponSlots * baseMult) + (additionalTomeSlots * baseMult));
         }
     }

@@ -23,9 +23,9 @@ internal static class DisableSteamLeaderboardUploading {
 
     private static bool Prefix(string leaderboardName, int score, Il2CppStructArray<int> details, ELeaderboardCategory category) {
         if (!Enabled) {
-            if (MoreTomeAndWeaponSlots.WillTriggerAntiCheat() || MoreRefreshesSkipsAndBanishes.WillTriggerAntiCheat()) {
+            if (MoreTomeAndWeaponSlots.WillTriggerAntiCheat() || MoreRefreshesSkipsAndBanishes.WillTriggerAntiCheat() || AdvancedEnemyScaling.WillTriggerAntiCheat()) {
                 MelonLogger.Warning($"[{nameof(DisableSteamLeaderboardUploading)}.{nameof(Prefix)}] You disabled the anti-cheat patch, but you are playing with tweaks that are considered cheating. Please keep it fair for others by reenabling it.");
-                MelonLogger.Warning($"[{nameof(DisableSteamLeaderboardUploading)}.{nameof(Prefix)}] Cheats: {nameof(MoreTomeAndWeaponSlots)}, {nameof(MoreRefreshesSkipsAndBanishes)}");
+                MelonLogger.Warning($"[{nameof(DisableSteamLeaderboardUploading)}.{nameof(Prefix)}] \"Cheats\": {nameof(MoreTomeAndWeaponSlots)}, {nameof(MoreRefreshesSkipsAndBanishes)}, {nameof(AdvancedEnemyScaling)}");
                 //Potato.MarkPotato(EPotatoFlags.Kills, "");
             }
             
