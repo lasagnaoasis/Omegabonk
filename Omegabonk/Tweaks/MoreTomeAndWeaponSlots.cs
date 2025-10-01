@@ -56,27 +56,14 @@ internal static class MoreTomeAndWeaponSlots {
     [HarmonyPatch(typeof(DataManager), nameof(DataManager.Load), new Type[] { })]
     internal static class EditDataManagerPatch {
         private static void Postfix(DataManager __instance) {
-            if (!Enabled)
+            if (!Enabled || (AdditionalWeaponSlots == 0 && AdditionalWeaponSlots == 0))
                 return;
 
             var shopItems = __instance.shopItems;
             foreach (var shopItem in shopItems) {
                 var eShopItem = shopItem.Key;
                 var shopItemData = shopItem.Value;
-                switch (eShopItem) {
-                    case EShopItem.Weapons:
-                        OriginalMaxWeaponSlots = shopItemData.maxLevel;
-                        shopItemData.maxLevel += AdditionalWeaponSlots;
-                        MelonLogger.Msg($"[{nameof(MoreTomeAndWeaponSlots)}.{nameof(EditDataManagerPatch)}.{nameof(Postfix)}] Weapon Max Level: {shopItemData.maxLevel}");
-                        break;
-                    case EShopItem.Tomes:
-                        OriginalMaxTomeSlots = shopItemData.maxLevel;
-                        shopItemData.maxLevel += AdditionalTomeSlots;
-                        MelonLogger.Msg($"[{nameof(MoreTomeAndWeaponSlots)}.{nameof(EditDataManagerPatch)}.{nameof(Postfix)}] Tome Max Level: {shopItemData.maxLevel}");
-                        break;
-                    default:
-                        break;
-                }
+                EditShopItemData(eShopItem, shopItemData);
             }
 
             //var unsortedShopItems = __instance.unsortedShopItems;
@@ -94,6 +81,25 @@ internal static class MoreTomeAndWeaponSlots {
             //            break;
             //    }
             //}
+        }
+
+        private static void EditShopItemData(EShopItem eShopItem, ShopItemData shopItemData) {
+            switch (eShopItem) {
+                case EShopItem.Weapons: {
+                    OriginalMaxWeaponSlots = shopItemData.maxLevel;
+                    shopItemData.maxLevel += AdditionalWeaponSlots;
+                    MelonLogger.Msg($"[{nameof(MoreRefreshesSkipsAndBanishes)}.{nameof(EditDataManagerPatch)}.{nameof(EditShopItemData)}] Changed {eShopItem} maxLevel from {OriginalMaxWeaponSlots} to {shopItemData.maxLevel}");
+                    break;
+                }
+                case EShopItem.Tomes: {
+                    OriginalMaxTomeSlots = shopItemData.maxLevel;
+                    shopItemData.maxLevel += AdditionalTomeSlots;
+                    MelonLogger.Msg($"[{nameof(MoreRefreshesSkipsAndBanishes)}.{nameof(EditDataManagerPatch)}.{nameof(EditShopItemData)}] Changed {eShopItem} maxLevel from {OriginalMaxTomeSlots} to {shopItemData.maxLevel}");
+                    break;
+                }
+                default:
+                    break;
+            }
         }
     }
 

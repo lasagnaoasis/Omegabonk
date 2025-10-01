@@ -19,6 +19,7 @@ internal static class BetterMinimap {
     internal static bool Enabled => Preferences.EnableBetterMinimap.Value;
     private static float MinimapScale => Preferences.MinimapScale.Value;
     private static float MinimapZoom => Preferences.MinimapZoom.Value;
+    private static bool AlwaysDisplayBossSpawnerArrow => Preferences.AlwaysDisplayBossSpawnerArrow.Value;
 
     internal static void OnLevelInitialized() {
         if (!Enabled)
@@ -34,6 +35,7 @@ internal static class BetterMinimap {
             var minimapCamera = GameObject.FindFirstObjectByType<MinimapCamera>();
             if (minimapCamera != null && minimapCamera.minimapCamera != null) {
                 ChangeZoom(minimapCamera);
+                DisplayBossArrow(minimapCamera);
                 break;
             }
 
@@ -64,5 +66,17 @@ internal static class BetterMinimap {
 
     private static void ChangeZoom(MinimapCamera minimapCamera) {
         minimapCamera.minimapCamera.orthographicSize = MinimapZoom;
+    }
+
+    private static void DisplayBossArrow(MinimapCamera minimapCamera) {
+        if (!AlwaysDisplayBossSpawnerArrow || minimapCamera.bossSpotted)
+            return;
+
+        minimapCamera.TryFindBossSpawner();
+        if (minimapCamera.bossSpawner == null)
+            return;
+
+        minimapCamera.AddArrow(minimapCamera.bossSpawner, minimapCamera.bossColor);
+        minimapCamera.bossSpotted = true;
     }
 }

@@ -50,7 +50,7 @@ internal static class BetterCamera {
             if (mouseWheel.timeActive <= 0d)
                 return;
 
-            
+
             var oldCameraDistance = SaveManager.Instance.config.cfVideoSettings.camera_distance;
             var newCameraDistance = oldCameraDistance;
             newCameraDistance += (mouseWheel.value * -1) * _zoomRatio;
@@ -58,6 +58,7 @@ internal static class BetterCamera {
             SaveManager.Instance.config.cfVideoSettings.camera_distance = newCameraDistance;
             if (newCameraDistance != MinCameraDistance && newCameraDistance != MaxCameraDistance) {
                 __instance.OnSettingUpdated(CameraDistancePreferenceKey, oldCameraDistance, newCameraDistance);
+
                 //__instance.currentZ = newCameraDistance + __instance.defaultZ;
                 //var offset = __instance.offset3rdPerson;
                 //__instance.offset3rdPerson = new Vector3(offset.x, offset.y, __instance.currentZ + __instance.defaultZ);
@@ -100,4 +101,15 @@ internal static class BetterCamera {
 
         }
     }
+
+    ////void PlayerCamera.CameraInput(Vector3 playerRotation)
+    //[HarmonyPatch(typeof(PlayerCamera), nameof(PlayerCamera.CameraInput), new Type[] { typeof(Vector3) })]
+    //private static class EditPlayerCameraPatch3 {
+    //    private static void Prefix(PlayerCamera __instance, Vector3 playerRotation) {
+    //        if (!Enabled)
+    //            return;
+
+            
+    //    }
+    //}
 }
