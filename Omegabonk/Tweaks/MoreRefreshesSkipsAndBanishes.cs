@@ -24,10 +24,12 @@ internal static class MoreRefreshesSkipsAndBanishes {
     private static int OriginalSkips { get; set; }
     private static int OriginalBanishes { get; set; }
 
-    internal static bool Enabled => Preferences.EnableMoreRefreshesSkipsAndBanishes.Value;
+    internal static bool Enabled => Preferences.Initialized && Preferences.EnableMoreRefreshesSkipsAndBanishes.Value;
     internal static int AdditionalRefreshes => Preferences.AdditionalRefreshes.Value;
     internal static int AdditionalSkips => Preferences.AdditionalSkips.Value;
     internal static int AdditionalBanishes => Preferences.AdditionalBanishes.Value;
+
+    internal static bool WillTriggerAntiCheat() => Enabled && (AdditionalRefreshes > 0 || AdditionalSkips > 0 || AdditionalBanishes > 0);
 
     //void DataManager.Load()
     [HarmonyPatch(typeof(DataManager), nameof(DataManager.Load), new Type[] { })]

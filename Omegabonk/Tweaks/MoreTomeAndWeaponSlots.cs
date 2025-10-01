@@ -27,10 +27,11 @@ internal static class MoreTomeAndWeaponSlots {
     private static int OriginalMaxTomeSlots { get; set; }
     private static int OriginalMaxWeaponSlots { get; set; }
 
-    internal static bool Enabled => Preferences.EnableMoreTomesAndWeapons.Value;
+    internal static bool Enabled => Preferences.Initialized && Preferences.EnableMoreTomesAndWeapons.Value;
     internal static int AdditionalTomeSlots => Preferences.AdditionalTomeSlots.Value;
     internal static int AdditionalWeaponSlots => Preferences.AdditionalWeaponSlots.Value;
 
+    internal static bool WillTriggerAntiCheat() => Enabled && (AdditionalTomeSlots > 0 || AdditionalWeaponSlots > 0);
 
     //private static void Postfix(ref int __result) {
     //    __result = _maxTomeSlots;
