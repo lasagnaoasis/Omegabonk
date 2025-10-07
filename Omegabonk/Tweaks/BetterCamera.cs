@@ -50,7 +50,6 @@ internal static class BetterCamera {
             if (mouseWheel.timeActive <= 0d)
                 return;
 
-
             var oldCameraDistance = SaveManager.Instance.config.cfVideoSettings.camera_distance;
             var newCameraDistance = oldCameraDistance;
             newCameraDistance += (mouseWheel.value * -1) * _zoomRatio;

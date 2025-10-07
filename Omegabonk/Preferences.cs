@@ -67,7 +67,7 @@ internal static class Preferences {
         AdditionalWeaponSlots = OmegabonkCategory.CreateEntry("AdditionalWeaponSlots", 1, description: "Additional weapon slots (0 - 3)", validator: new ValueRange<int>(MinAdditionalWeaponSlots, MaxAdditionalWeaponSlots));
         AdditionalTomeSlots = OmegabonkCategory.CreateEntry("AdditionalTomeSlots", 1, description: "Additional tome slots (0 - 3)", validator: new ValueRange<int>(MinAdditionalTomeSlots, MaxAdditionalTomeSlots));
 
-        EnableMoreRefreshesSkipsAndBanishes = OmegabonkCategory.CreateEntry("EnableMoreRefreshesSkipsAndBanishes", true, description: "Enables additioanl refreshes, skips and banishes that you can purchase in the shop");
+        EnableMoreRefreshesSkipsAndBanishes = OmegabonkCategory.CreateEntry("EnableMoreRefreshesSkipsAndBanishes", true, description: "Enables additional refreshes, skips and banishes that you can purchase in the shop");
         AdditionalRefreshes = OmegabonkCategory.CreateEntry("AdditionalRefreshes", 4, description: "Additional refreshes (0 - 14)", validator: new ValueRange<int>(0, 14));
         AdditionalSkips = OmegabonkCategory.CreateEntry("AdditionalSkips", 4, description: "Additional skips (0 - 14)", validator: new ValueRange<int>(0, 14));
         AdditionalBanishes = OmegabonkCategory.CreateEntry("AdditionalBanishes", 4, description: "Additional banishes (0 - 14)", validator: new ValueRange<int>(0, 14));

@@ -1,10 +1,15 @@
 ﻿using Il2Cpp;
 
 using Il2CppAssets.Scripts.Actors.Player;
+using Il2CppAssets.Scripts.Inventory__Items__Pickups.Stats;
 using Il2CppAssets.Scripts.Managers;
+using Il2CppAssets.Scripts.Menu.Shop;
+
+using Il2CppRewired;
 
 using MelonLoader;
 
+using Omegabonk;
 using Omegabonk.Tweaks;
 
 using System.Collections;
@@ -12,14 +17,16 @@ using System.Collections.Concurrent;
 
 using UnityEngine;
 
-[assembly: MelonInfo(typeof(Omegabonk.Core), "Omegabonk", "0.1.4", "skatinglasagna", null)]
+[assembly: MelonInfo(typeof(OmegabonkMod), "Omegabonk", "0.1.5", "skatinglasagna")]
 [assembly: MelonGame("Ved", "Megabonk")]
 
 namespace Omegabonk {
-    public class Core : MelonMod {
-        internal static Core Instance;
+    public class OmegabonkMod : MelonMod {
+        internal static OmegabonkMod Instance;
 
         private ConcurrentQueue<Action> _actionQueue = new ConcurrentQueue<Action>();
+
+        private SceneState _sceneState;
 
         public override void OnEarlyInitializeMelon() {
             Instance = this;
@@ -31,9 +38,10 @@ namespace Omegabonk {
 
         //}
 
-        //public override void OnLateInitializeMelon() {
-
-        //}
+        public override void OnLateInitializeMelon() {
+            if (MoreTomeAndWeaponSlots.Enabled)
+                MoreTomeAndWeaponSlots.OnLateInitializeMelon();
+        }
 
         //public override void OnSceneWasLoaded(int buildIndex, string sceneName) {
 
@@ -42,15 +50,23 @@ namespace Omegabonk {
         public override void OnSceneWasInitialized(int buildIndex, string sceneName) {
             switch (buildIndex) {
                 case -1: //None
+                    _sceneState = SceneState.None;
                     break;
                 case 0: //Boot
+                    _sceneState = SceneState.Boot;
                     OnBootInitialized();
                     break;
                 case 1: //Main menu
+                    _sceneState = SceneState.MainMenu;
                     OnMainMenuInitialized();
                     break;
                 case 2: //Level
+                    _sceneState = SceneState.Level;
                     OnLevelInitialized();
+                    break;
+                case 3:
+                    _sceneState = SceneState.LoadingScreen;
+                    OnLoadingScreenInitialized();
                     break;
             }
         }
@@ -62,8 +78,8 @@ namespace Omegabonk {
         private void OnMainMenuInitialized() {
             //DisableSteamAchievements.Enable();
 
-            if (MoreTomeAndWeaponSlots.Enabled)
-                MoreTomeAndWeaponSlots.OnMainMenuInitialized();
+            //if (MoreTomeAndWeaponSlots.Enabled)
+            //    MoreTomeAndWeaponSlots.OnMainMenuInitialized();
 
             //if (BetterEnemyScaling.Enabled) {
             //    EnemyManager.maxNumEnemiesPooled = BetterEnemyScaling.MaxNumberOfEnemiesPooled;
@@ -71,13 +87,17 @@ namespace Omegabonk {
         }
 
         private void OnLevelInitialized() {
-            if (BetterMinimap.Enabled)
-                BetterMinimap.OnLevelInitialized();
+            //if (BetterMinimap.Enabled)
+            //    BetterMinimap.OnLevelInitialized();
 
-            if (MoreTomeAndWeaponSlots.Enabled)
-                MoreTomeAndWeaponSlots.OnLevelInitialized();
+            //if (MoreTomeAndWeaponSlots.Enabled)
+            //    MoreTomeAndWeaponSlots.OnLevelInitialized();
 
             //MelonCoroutines.Start(DelayedOnLevelInitialized());
+        }
+
+        private void OnLoadingScreenInitialized() {
+
         }
 
         private IEnumerator DelayedOnLevelInitialized() {
@@ -105,6 +125,14 @@ namespace Omegabonk {
 
         internal void EnqueueAction(Action action) {
             _actionQueue.Enqueue(action);
+        }
+
+        private enum SceneState {
+            None,
+            Boot,
+            MainMenu,
+            Level,
+            LoadingScreen
         }
     }
 }

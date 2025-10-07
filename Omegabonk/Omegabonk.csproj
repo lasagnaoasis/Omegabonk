@@ -15,6 +15,9 @@
     <Reference Include="Assembly-CSharp">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Megabonk\MelonLoader\Il2CppAssemblies\Assembly-CSharp.dll</HintPath>
     </Reference>
+    <Reference Include="Iced">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Megabonk\MelonLoader\net6\Iced.dll</HintPath>
+    </Reference>
     <Reference Include="Il2CppCoffee.UIParticle">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Megabonk\MelonLoader\Il2CppAssemblies\Il2CppCoffee.UIParticle.dll</HintPath>
     </Reference>

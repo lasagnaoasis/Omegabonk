@@ -1,4 +1,6 @@
-﻿using Il2Cpp;
+﻿using HarmonyLib;
+
+using Il2Cpp;
 
 using Il2CppAssets.Scripts.Camera;
 
@@ -13,6 +15,9 @@ using System.Threading.Tasks;
 
 using UnityEngine;
 
+using static MelonLoader.MelonLogger;
+using static Omegabonk.Tweaks.MoreTomeAndWeaponSlots;
+
 namespace Omegabonk.Tweaks;
 
 internal static class BetterMinimap {
@@ -21,62 +26,73 @@ internal static class BetterMinimap {
     private static float MinimapZoom => Preferences.MinimapZoom.Value;
     private static bool AlwaysDisplayBossSpawnerArrow => Preferences.AlwaysDisplayBossSpawnerArrow.Value;
 
-    internal static void OnLevelInitialized() {
-        if (!Enabled)
-            return;
+    //void MinimapCamera.Start()
+    [HarmonyPatch(typeof(MinimapCamera), nameof(MinimapCamera.Start), new Type[] { })]
+    private static class EditMinimapCameraPatch1 {
+        private static void Postfix(MinimapCamera __instance) {
+            if (!Enabled)
+                return;
 
-        MelonCoroutines.Start(DelayedEditMinimapUi());
-        MelonCoroutines.Start(DelayedEditMinimapCamera());
-    }
+            MelonCoroutines.Start(DelayedStart(__instance));
+        }
 
-    private static IEnumerator DelayedEditMinimapCamera() {
-        var maxWait = 150;
-        while (maxWait > 0) {
-            var minimapCamera = GameObject.FindFirstObjectByType<MinimapCamera>();
-            if (minimapCamera != null && minimapCamera.minimapCamera != null) {
-                ChangeZoom(minimapCamera);
-                DisplayBossArrow(minimapCamera);
-                break;
+        private static IEnumerator DelayedStart(MinimapCamera instance) {
+            for (int i = 0; i < 10; i++)
+                yield return new WaitForEndOfFrame();
+
+            ChangeZoom(instance);
+
+            if (!AlwaysDisplayBossSpawnerArrow || instance.bossSpotted)
+                yield break;
+
+            yield return DisplayBossArrow(instance);
+        }
+        private static void ChangeZoom(MinimapCamera minimapCamera) {
+            minimapCamera.minimapCamera.orthographicSize = MinimapZoom;
+        }
+
+        private static IEnumerator DisplayBossArrow(MinimapCamera instance) {
+            instance.TryFindBossSpawner();
+            if (instance.bossSpawner == null) {
+                var maxWait = 150;
+                while (instance.bossSpawner == null && maxWait > 0) {
+                    yield return new WaitForSeconds(0.1f);
+
+                    instance.TryFindBossSpawner();
+
+                    maxWait--;
+                }
+
+                if (instance.bossSpawner == null) {
+                    MelonLogger.Error($"[{nameof(BetterMinimap)}.{nameof(EditMinimapCameraPatch1)}.{nameof(DelayedStart)}] Couldn't find boss spawner!");
+                    yield break;
+                }
             }
 
-            yield return new WaitForSeconds(0.1f);
-
-            maxWait--;
+            instance.AddArrow(instance.bossSpawner, instance.bossColor);
+            instance.bossSpotted = true;
         }
     }
 
-    private static IEnumerator DelayedEditMinimapUi() {
-        var maxWait = 150;
-        while (maxWait > 0) {
-            var minimapUi = GameObject.FindFirstObjectByType<MinimapUi>();
-            if (minimapUi != null) {
-                UpdateScale(minimapUi);
-                break;
-            }
+    //void MinimapUi.Awake()
+    [HarmonyPatch(typeof(MinimapUi), nameof(MinimapUi.Awake), new Type[] { })]
+    private static class EditMinimapUiPatch1 {
+        private static void Postfix(MinimapUi __instance) {
+            if (!Enabled)
+                return;
 
-            yield return new WaitForSeconds(0.1f);
-
-            maxWait--;
+            MelonCoroutines.Start(DelayedStart(__instance));
         }
-    }
 
-    private static void UpdateScale(MinimapUi minimapUi) {
-        minimapUi.UpdateScale(MinimapScale);
-    }
+        private static IEnumerator DelayedStart(MinimapUi instance) {
+            for (int i = 0; i < 10; i++)
+                yield return new WaitForEndOfFrame();
 
-    private static void ChangeZoom(MinimapCamera minimapCamera) {
-        minimapCamera.minimapCamera.orthographicSize = MinimapZoom;
-    }
+            UpdateScale(instance);
+        }
 
-    private static void DisplayBossArrow(MinimapCamera minimapCamera) {
-        if (!AlwaysDisplayBossSpawnerArrow || minimapCamera.bossSpotted)
-            return;
-
-        minimapCamera.TryFindBossSpawner();
-        if (minimapCamera.bossSpawner == null)
-            return;
-
-        minimapCamera.AddArrow(minimapCamera.bossSpawner, minimapCamera.bossColor);
-        minimapCamera.bossSpotted = true;
+        private static void UpdateScale(MinimapUi minimapUi) {
+            minimapUi.UpdateScale(MinimapScale);
+        }
     }
 }

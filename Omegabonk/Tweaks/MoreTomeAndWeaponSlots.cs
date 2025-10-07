@@ -3,26 +3,42 @@
 using Il2Cpp;
 
 using Il2CppAssets.Scripts._Data.ShopItems;
+using Il2CppAssets.Scripts._Data.Tomes;
+using Il2CppAssets.Scripts.Actors.Player;
 using Il2CppAssets.Scripts.Inventory__Items__Pickups;
+using Il2CppAssets.Scripts.Inventory__Items__Pickups.Items;
+using Il2CppAssets.Scripts.Inventory__Items__Pickups.Weapons;
 using Il2CppAssets.Scripts.Saves___Serialization.Progression.Unlocks;
 using Il2CppAssets.Scripts.Steam;
+using Il2CppAssets.Scripts.UI;
+
+using Il2CppInterop.Common;
+using Il2CppInterop.Runtime;
+using Il2CppInterop.Runtime.Runtime;
+using Il2CppInterop.Runtime.Runtime.VersionSpecific.MethodInfo;
+
+using Il2CppSystem.Collections.Generic;
+using Il2CppSystem.Diagnostics;
 
 using MelonLoader;
+using MelonLoader.CoreClrUtils;
+using MelonLoader.NativeUtils;
 
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.Metrics;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
 using UnityEngine;
 
+using static MelonLoader.MelonLogger;
+
 namespace Omegabonk.Tweaks;
 
-//int InventoryUtility.GetNumMaxTomeSlots()
-//[HarmonyPatch(typeof(InventoryUtility), nameof(InventoryUtility.GetNumMaxTomeSlots), new Type[] { })]
 internal static class MoreTomeAndWeaponSlots {
     private static int OriginalMaxTomeSlots { get; set; }
     private static int OriginalMaxWeaponSlots { get; set; }
@@ -33,24 +49,97 @@ internal static class MoreTomeAndWeaponSlots {
 
     internal static bool WillTriggerAntiCheat() => Enabled && (AdditionalTomeSlots > 0 || AdditionalWeaponSlots > 0);
 
-    //private static void Postfix(ref int __result) {
-    //    __result = _maxTomeSlots;
-    //}
+    private static bool _dataManagerLoaded = false;
 
-    internal static void Enable() {
+    private unsafe delegate int GetNodeTypeDelegate(IntPtr instance, Il2CppMethodInfo* methodInfo);
+    private static GetNodeTypeDelegate _getNodeTypePatchDelegate;
+    private static NativeHook<GetNodeTypeDelegate> _getNodeTypeHook;
+    private const int GetNodeTypeDefaultReturnValue = 4;
 
+    internal static unsafe void OnLateInitializeMelon() {
+        if (!Enabled)
+            return;
+
+        //var getNumMaxTomeSlotsMethodPointer = *(IntPtr*)(IntPtr)Il2CppInteropUtils.GetIl2CppMethodInfoPointerFieldForGeneratedMethod(typeof(InventoryUtility).GetMethod(nameof(InventoryUtility.GetNumMaxTomeSlots))).GetValue(null);
+        //var getNumMaxWeaponSlotsMethodPointer = *(IntPtr*)(IntPtr)Il2CppInteropUtils.GetIl2CppMethodInfoPointerFieldForGeneratedMethod(typeof(InventoryUtility).GetMethod(nameof(InventoryUtility.GetNumMaxWeaponSlots))).GetValue(null);
+
+        //var inventoryHudRefreshMethodPointer = *(IntPtr*)(IntPtr)Il2CppInteropUtils.GetIl2CppMethodInfoPointerFieldForGeneratedMethod(typeof(InventoryHud).GetMethod(nameof(InventoryHud.Refresh))).GetValue(null);
+        //var upgradeInventoryUiRefreshMethodPointer = *(IntPtr*)(IntPtr)Il2CppInteropUtils.GetIl2CppMethodInfoPointerFieldForGeneratedMethod(typeof(UpgradeInventoryUI).GetMethod(nameof(UpgradeInventoryUI.Refresh))).GetValue(null);
+
+        //Melon<OmegabonkMod>.Logger.Msg($"{getNumMaxTomeSlotsMethodPointer} {getNumMaxWeaponSlotsMethodPointer} {inventoryHudRefreshMethodPointer} {upgradeInventoryUiRefreshMethodPointer}");
+
+        NativeHookGetNodeType();
     }
 
-    internal static void Disable() {
+    //https://melonwiki.xyz/#/modders/patching?id=patching-using-native-hooks
+    private static unsafe void NativeHookGetNodeType() {
+        IntPtr originalMethod = *(IntPtr*)(IntPtr)Il2CppInteropUtils.GetIl2CppMethodInfoPointerFieldForGeneratedMethod(typeof(InventoryUtility).GetMethod(nameof(InventoryUtility.GetNumMaxTomeSlots))).GetValue(null);
 
+        _getNodeTypePatchDelegate = GetNodeType;
+
+        IntPtr delegatePointer = Marshal.GetFunctionPointerForDelegate(_getNodeTypePatchDelegate);
+
+        NativeHook<GetNodeTypeDelegate> hook = new NativeHook<GetNodeTypeDelegate>(originalMethod, delegatePointer);
+
+        hook.Attach();
+
+        _getNodeTypeHook = hook;
     }
 
-    internal static void OnMainMenuInitialized() {
+    private unsafe static int GetNodeType(IntPtr instance, Il2CppMethodInfo* methodInfo) {
+        try {
+            if (methodInfo == (Il2CppMethodInfo*)IntPtr.Zero)
+                return _getNodeTypeHook.Trampoline(instance, methodInfo);
+        } catch {
+            return GetNodeTypeDefaultReturnValue;
+        }
 
-    }
+        try {
+            var il2CppMethodInfo = UnityVersionHandler.Wrap(methodInfo);
+            if (il2CppMethodInfo != null && il2CppMethodInfo.MethodInfoPointer != (Il2CppMethodInfo*)IntPtr.Zero) {
+                //Melon<OmegabonkMod>.Logger.Msg($"[{nameof(MoreTomeAndWeaponSlots)}.{nameof(GetNodeType)}] il2cppmi {(IntPtr)methodInfo} - mip {(IntPtr)il2CppMethodInfo.MethodInfoPointer} - mp {il2CppMethodInfo.MethodPointer} - np {il2CppMethodInfo.Name} - ip {il2CppMethodInfo.InvokerMethod}");
+                if (!il2CppMethodInfo.MethodPointer.IsValid())
+                    return _getNodeTypeHook.Trampoline(instance, methodInfo);
 
-    internal static void OnLevelInitialized() {
+                var methodNameIntPtr = il2CppMethodInfo.Name;
+                if (methodNameIntPtr == (IntPtr)methodInfo)
+                    return _getNodeTypeHook.Trampoline(instance, methodInfo);
 
+                var methodName = string.Empty;
+                if (methodNameIntPtr.IsValid())
+                    methodName = Marshal.PtrToStringAnsi(methodNameIntPtr);
+
+                //var il2CppClass = UnityVersionHandler.Wrap(il2CppMethodInfo.Class);
+                //if (il2CppClass != null && (IntPtr)il2CppClass.ClassPointer != IntPtr.Zero) {
+                //    var classNamespaceIntPtr = il2CppClass.Namespace;
+                //    var classNameIntPtr = il2CppClass.Name;
+                //    var classNamespace = string.Empty;
+                //    var className = string.Empty;
+                //    if (classNamespaceIntPtr != IntPtr.Zero)
+                //        classNamespace = Marshal.PtrToStringAnsi(classNamespaceIntPtr);
+                //    if (classNameIntPtr != IntPtr.Zero)
+                //        className = Marshal.PtrToStringAnsi(classNameIntPtr);
+                //}
+
+                if (!string.IsNullOrWhiteSpace(methodName)) {
+                    //Melon<OmegabonkMod>.Logger.Msg($"[{nameof(MoreTomeAndWeaponSlots)}.{nameof(GetNodeType)}] Caller: {methodName}");
+
+                    if (methodName.Equals(nameof(InventoryUtility.GetNumMaxTomeSlots))) {
+                        return _getNodeTypeHook.Trampoline(instance, methodInfo) + AdditionalTomeSlots;
+                    } else if (methodName.Equals(nameof(InventoryUtility.GetNumMaxWeaponSlots))) {
+                        return _getNodeTypeHook.Trampoline(instance, methodInfo) + AdditionalWeaponSlots;
+                    }
+                }
+            }
+        } catch {
+            return GetNodeTypeDefaultReturnValue;
+        }
+
+        try {
+            return _getNodeTypeHook.Trampoline(instance, methodInfo);
+        } catch {
+            return GetNodeTypeDefaultReturnValue;
+        }
     }
 
     //void DataManager.Load()
@@ -66,6 +155,8 @@ internal static class MoreTomeAndWeaponSlots {
                 var shopItemData = shopItem.Value;
                 EditShopItemData(eShopItem, shopItemData);
             }
+
+            _dataManagerLoaded = true;
 
             //var unsortedShopItems = __instance.unsortedShopItems;
             //foreach (var unsortedShopItem in unsortedShopItems) {
@@ -184,9 +275,7 @@ internal static class MoreTomeAndWeaponSlots {
                             tomeCounter++;
                         }
 
-                        MelonLogger.Msg($"[{nameof(MoreTomeAndWeaponSlots)}.{nameof(EditShopWindowPatch2)}.{nameof(DelayedStart)}] TL: {DataManager.Instance.shopItems[EShopItem.Tomes].maxLevel} ({DataManager.Instance.shopItems[EShopItem.Tomes].GetMaxLevel()}) ({DataManager.Instance.shopItems[EShopItem.Tomes].IsMaxLevel()}) ({SaveManager.Instance.progression.shopItems[EShopItem.Tomes]})");
                         shopContainer.RefreshLevel(true);
-                        MelonLogger.Msg($"[{nameof(MoreTomeAndWeaponSlots)}.{nameof(EditShopWindowPatch2)}.{nameof(DelayedStart)}] TL: {DataManager.Instance.shopItems[EShopItem.Tomes].maxLevel} ({DataManager.Instance.shopItems[EShopItem.Tomes].GetMaxLevel()}) ({DataManager.Instance.shopItems[EShopItem.Tomes].IsMaxLevel()}) ({SaveManager.Instance.progression.shopItems[EShopItem.Tomes]})");
 
                         break;
                     }
@@ -235,7 +324,10 @@ internal static class MoreTomeAndWeaponSlots {
 
             MelonLogger.Msg($"[{nameof(MoreTomeAndWeaponSlots)}.{nameof(EditInventoryHudPatch2)}.{nameof(Postfix)}] InventoryHud Start");
 
-            MelonCoroutines.Start(DelayedStart(__instance));
+            //MelonCoroutines.Start(DelayedStart(__instance));
+
+            MelonLogger.Msg($"[{nameof(MoreTomeAndWeaponSlots)}.{nameof(EditInventoryHudPatch2)}.{nameof(Postfix)}] Tomes | Available: {InventoryUtility.GetNumAvailableTomeSlots()}, Max: {InventoryUtility.GetNumMaxTomeSlots()}");
+            MelonLogger.Msg($"[{nameof(MoreTomeAndWeaponSlots)}.{nameof(EditInventoryHudPatch2)}.{nameof(Postfix)}] Weapons | Available: {InventoryUtility.GetNumAvailableWeaponSlots()}, Max: {InventoryUtility.GetNumMaxWeaponSlots()}");
         }
 
         private static IEnumerator DelayedStart(InventoryHud instance) {
@@ -358,6 +450,214 @@ internal static class MoreTomeAndWeaponSlots {
         }
     }
 
+    //void InventoryHud.Refresh()
+    [HarmonyPatch(typeof(InventoryHud), nameof(InventoryHud.Refresh), new Type[] { })]
+    internal static class EditInventoryHudPatch3 {
+        private static bool Prefix(InventoryHud __instance) {
+            Refresh(__instance);
+            //MelonCoroutines.Start(DelayedRefresh(__instance));
+
+            return false;
+        }
+
+        //private static IEnumerator DelayedRefresh(InventoryHud instance) {
+        //    yield return new WaitForEndOfFrame();
+
+        //    try {
+        //        Refresh(instance);
+        //    } catch (Exception e) {
+        //        Melon<OmegabonkMod>.Logger.Error(e);
+        //    }
+        //}
+
+        //this aims to be a 1:1 copy of the native code
+        //void InventoryHud$$Refresh(InventoryHud_o *__this,MethodInfo *method)
+        private static void Refresh(InventoryHud instance) {
+            var myPlayer = MyPlayer.Instance;
+            if (myPlayer == null) {
+                Melon<OmegabonkMod>.Logger.Error($"[{nameof(Refresh)}] myPlayer null");
+                return;
+            }
+
+            var playerInventory = myPlayer.inventory;
+            if (playerInventory == null) {
+                Melon<OmegabonkMod>.Logger.Error($"[{nameof(Refresh)}] playerInventory null");
+                return;
+            }
+
+            var tomeInventory = playerInventory.tomeInventory;
+            if (tomeInventory == null) {
+                Melon<OmegabonkMod>.Logger.Error($"[{nameof(Refresh)}] tomeInventory null");
+                return;
+            }
+
+            var weaponInventory = playerInventory.weaponInventory;
+            if (weaponInventory == null) {
+                Melon<OmegabonkMod>.Logger.Error($"[{nameof(Refresh)}] weaponInventory null");
+                return;
+            }
+
+            var tomeLevels = tomeInventory.tomeLevels;
+            if (tomeLevels == null) {
+                Melon<OmegabonkMod>.Logger.Error($"[{nameof(Refresh)}] tomeLevels null");
+                return;
+            }
+
+            var tomeLevelsKeys = tomeLevels.Keys;
+            if (tomeLevelsKeys == null) {
+                Melon<OmegabonkMod>.Logger.Error($"[{nameof(Refresh)}] tomeLevelsKeys null");
+                return;
+            }
+
+            var tomeLevelsKeysAsEnumerable = tomeLevelsKeys.Cast<Il2CppSystem.Collections.Generic.IEnumerable<ETome>>();
+            if (tomeLevelsKeysAsEnumerable == null) {
+                Melon<OmegabonkMod>.Logger.Error($"[{nameof(Refresh)}] tomeLevelsKeysAsEnumerable null");
+                return;
+            }
+
+            var tomeLevelsKeysList = new Il2CppSystem.Collections.Generic.List<ETome>(tomeLevelsKeysAsEnumerable);
+            if (tomeLevelsKeysList == null) {
+                Melon<OmegabonkMod>.Logger.Error($"[{nameof(Refresh)}] tomeLevelsKeysList null");
+                return;
+            }
+
+            var weapons = weaponInventory.weapons;
+            if (weapons == null) {
+                Melon<OmegabonkMod>.Logger.Error($"[{nameof(Refresh)}] weapons null");
+                return;
+            }
+
+            var weaponsValues = weapons.Values;
+            if (weaponsValues == null) {
+                Melon<OmegabonkMod>.Logger.Error($"[{nameof(Refresh)}] weaponsValues null");
+                return;
+            }
+
+            var weaponsValuesAsEnumerable = weaponsValues.Cast<Il2CppSystem.Collections.Generic.IEnumerable<WeaponBase>>();
+            if (weaponsValuesAsEnumerable == null) {
+                Melon<OmegabonkMod>.Logger.Error($"[{nameof(Refresh)}] weaponsValuesAsEnumerable null");
+                return;
+            }
+
+            var weaponsValuesList = new Il2CppSystem.Collections.Generic.List<WeaponBase>(weaponsValuesAsEnumerable);
+            if (weaponsValuesList == null) {
+                Melon<OmegabonkMod>.Logger.Error($"[{nameof(Refresh)}] weaponsValuesList null");
+                return;
+            }
+
+            var availableTomeSlots = InventoryUtility.GetNumAvailableTomeSlots();
+            var availableWeaponSlots = InventoryUtility.GetNumAvailableWeaponSlots();
+            var maxTomeSlots = InventoryUtility.GetNumMaxTomeSlots();
+            var maxWeaponSlots = InventoryUtility.GetNumMaxWeaponSlots();
+
+            var tomeContainers = instance.tomeContainers;
+            if (tomeContainers == null) {
+                Melon<OmegabonkMod>.Logger.Error($"[{nameof(Refresh)}] tomeContainers null");
+                return;
+            }
+
+            var weaponContainers = instance.weaponContainers;
+            if (weaponContainers == null) {
+                Melon<OmegabonkMod>.Logger.Error($"[{nameof(Refresh)}] weaponContainers null");
+                return;
+            }
+
+            var itemContainerPrefab = instance.itemContainerPrefab;
+            if (itemContainerPrefab == null) {
+                Melon<OmegabonkMod>.Logger.Error($"[{nameof(Refresh)}] itemContainerPrefab null");
+                return;
+            }
+
+            var tomeParent = instance.tomeParent;
+            if (tomeParent == null) {
+                Melon<OmegabonkMod>.Logger.Error($"[{nameof(Refresh)}] tomeParent null");
+                return;
+            }
+
+            var weaponParent = instance.weaponParent;
+            if (weaponParent == null) {
+                Melon<OmegabonkMod>.Logger.Error($"[{nameof(Refresh)}] weaponParent null");
+                return;
+            }
+
+            var dataManager = DataManager.Instance;
+            if (dataManager == null) {
+                Melon<OmegabonkMod>.Logger.Error($"[{nameof(Refresh)}] dataManager null");
+                return;
+            }
+
+            var tomeSlots = 0;
+            while (maxTomeSlots > tomeSlots) {
+                if (tomeContainers.Count <= tomeSlots) {
+                    var tomeItemContainerGameObject = GameObject.Instantiate(itemContainerPrefab, tomeParent);
+                    var tomeInventoryItemPrefabUi = tomeItemContainerGameObject.GetComponent<InventoryItemPrefabUI>();
+                    tomeContainers.Add(tomeInventoryItemPrefabUi);
+                    tomeItemContainerGameObject.SetActive(true);
+                }
+
+                var currentTomeInventoryItemPrefabUi = tomeContainers[tomeSlots];
+                if (currentTomeInventoryItemPrefabUi == null) {
+                    Melon<OmegabonkMod>.Logger.Error($"[{nameof(Refresh)}] currentTomeInventoryItemPrefabUi null");
+                    break;
+                }
+
+                if (availableTomeSlots > tomeSlots) {
+                    if (tomeLevelsKeysList.Count > tomeSlots) {
+                        var eTome = tomeLevelsKeysList[tomeSlots];
+                        var tomeData = dataManager.GetTome(eTome);
+                        currentTomeInventoryItemPrefabUi.SetItem(tomeData);
+                    } else {
+                        currentTomeInventoryItemPrefabUi.SetItem(null);
+                    }
+                } else {
+                    //currentTomeInventoryItemPrefabUi.gameObject.SetActive(false);
+                    currentTomeInventoryItemPrefabUi.SetUnavailable();
+                }
+
+                tomeSlots++;
+            }
+
+            var weaponSlots = 0;
+            while (maxWeaponSlots > weaponSlots) {
+                if (weaponContainers.Count <= weaponSlots) {
+                    var weaponItemContainerGameObject = GameObject.Instantiate(itemContainerPrefab, weaponParent);
+                    var weaponInventoryItemPrefabUi = weaponItemContainerGameObject.GetComponent<InventoryItemPrefabUI>();
+                    weaponContainers.Add(weaponInventoryItemPrefabUi);
+                    weaponItemContainerGameObject.SetActive(true);
+                }
+
+                var currentWeaponInventoryItemPrefabUi = weaponContainers[weaponSlots];
+                if (currentWeaponInventoryItemPrefabUi == null) {
+                    Melon<OmegabonkMod>.Logger.Error($"[{nameof(Refresh)}] currentWeaponInventoryItemPrefabUi null");
+                    break;
+                }
+
+                if (availableWeaponSlots > weaponSlots) {
+                    if (weaponsValuesList.Count > weaponSlots) {
+                        var weaponBase = weaponsValuesList[weaponSlots];
+                        var weaponData = weaponBase.weaponData;
+                        currentWeaponInventoryItemPrefabUi.SetItem(weaponData);
+                    } else {
+                        currentWeaponInventoryItemPrefabUi.SetItem(null);
+                    }
+                } else {
+                    //currentTomeInventoryItemPrefabUi.gameObject.SetActive(false);
+                    currentWeaponInventoryItemPrefabUi.SetUnavailable();
+                }
+
+                weaponSlots++;
+            }
+
+            var transform = instance.transform;
+            if (transform == null) {
+                Melon<OmegabonkMod>.Logger.Error($"[{nameof(Refresh)}] transform null");
+                return;
+            }
+
+            UiUtility.RebuildUi(transform);
+        }
+    }
+
     //void UpgradeInventoryUI.Start()
     [HarmonyPatch(typeof(UpgradeInventoryUI), nameof(UpgradeInventoryUI.OnEnable), new Type[] { })]
     internal static class EditUpgradeInventoryUiPatch1 {
@@ -367,7 +667,7 @@ internal static class MoreTomeAndWeaponSlots {
 
             MelonLogger.Msg($"[{nameof(MoreTomeAndWeaponSlots)}.{nameof(EditUpgradeInventoryUiPatch1)}.{nameof(Postfix)}] UpgradeInventoryUI OnEnable");
 
-            MelonCoroutines.Start(DelayedOnEnable(__instance));
+            //MelonCoroutines.Start(DelayedOnEnable(__instance));
         }
 
         private static IEnumerator DelayedOnEnable(UpgradeInventoryUI instance) {
@@ -481,6 +781,277 @@ internal static class MoreTomeAndWeaponSlots {
         }
     }
 
+    //void UpgradeInventoryUI.Refresh()
+    [HarmonyPatch(typeof(UpgradeInventoryUI), nameof(UpgradeInventoryUI.Refresh), new Type[] { })]
+    internal static class EditUpgradeInventoryUiPatch2 {
+        private static bool Prefix(UpgradeInventoryUI __instance) {
+            Refresh(__instance);
+
+            return false;
+        }
+
+        private static void Refresh(UpgradeInventoryUI instance) {
+            var myPlayer = MyPlayer.Instance;
+            if (myPlayer == null) {
+                Melon<OmegabonkMod>.Logger.Error($"[{nameof(Refresh)}] myPlayer null");
+                return;
+            }
+
+            var playerInventory = myPlayer.inventory;
+            if (playerInventory == null) {
+                Melon<OmegabonkMod>.Logger.Error($"[{nameof(Refresh)}] playerInventory null");
+                return;
+            }
+
+            var tomeInventory = playerInventory.tomeInventory;
+            if (tomeInventory == null) {
+                Melon<OmegabonkMod>.Logger.Error($"[{nameof(Refresh)}] tomeInventory null");
+                return;
+            }
+
+            var tomeLevels = tomeInventory.tomeLevels;
+            if (tomeLevels == null) {
+                Melon<OmegabonkMod>.Logger.Error($"[{nameof(Refresh)}] tomeLevels null");
+                return;
+            }
+
+            var tomeLevelsKeys = tomeLevels.Keys;
+            if (tomeLevelsKeys == null) {
+                Melon<OmegabonkMod>.Logger.Error($"[{nameof(Refresh)}] tomeLevelsKeys null");
+                return;
+            }
+
+            var tomeLevelsKeysAsEnumerable = tomeLevelsKeys.Cast<Il2CppSystem.Collections.Generic.IEnumerable<ETome>>();
+            if (tomeLevelsKeysAsEnumerable == null) {
+                Melon<OmegabonkMod>.Logger.Error($"[{nameof(Refresh)}] tomeLevelsKeysAsEnumerable null");
+                return;
+            }
+
+            var tomeLevelsKeysList = new Il2CppSystem.Collections.Generic.List<ETome>(tomeLevelsKeysAsEnumerable);
+            if (tomeLevelsKeysList == null) {
+                Melon<OmegabonkMod>.Logger.Error($"[{nameof(Refresh)}] tomeLevelsKeysList null");
+                return;
+            }
+
+            var weaponInventory = playerInventory.weaponInventory;
+            if (weaponInventory == null) {
+                Melon<OmegabonkMod>.Logger.Error($"[{nameof(Refresh)}] weaponInventory null");
+                return;
+            }
+
+            var weapons = weaponInventory.weapons;
+            if (weapons == null) {
+                Melon<OmegabonkMod>.Logger.Error($"[{nameof(Refresh)}] weapons null");
+                return;
+            }
+
+            var weaponsValues = weapons.Values;
+            if (weaponsValues == null) {
+                Melon<OmegabonkMod>.Logger.Error($"[{nameof(Refresh)}] weaponsValues null");
+                return;
+            }
+
+            var weaponsValuesAsEnumerable = weaponsValues.Cast<Il2CppSystem.Collections.Generic.IEnumerable<WeaponBase>>();
+            if (weaponsValuesAsEnumerable == null) {
+                Melon<OmegabonkMod>.Logger.Error($"[{nameof(Refresh)}] weaponsValuesAsEnumerable null");
+                return;
+            }
+
+            var weaponsValuesList = new Il2CppSystem.Collections.Generic.List<WeaponBase>(weaponsValuesAsEnumerable);
+            if (weaponsValuesList == null) {
+                Melon<OmegabonkMod>.Logger.Error($"[{nameof(Refresh)}] weaponsValuesList null");
+                return;
+            }
+
+            var itemInventory = playerInventory.itemInventory;
+            if (itemInventory == null) {
+                Melon<OmegabonkMod>.Logger.Error($"[{nameof(Refresh)}] itemInventory null");
+                return;
+            }
+
+            var items = itemInventory.items;
+            if (items == null) {
+                Melon<OmegabonkMod>.Logger.Error($"[{nameof(Refresh)}] items null");
+                return;
+            }
+
+            var itemsKeys = items.Keys;
+            if (itemsKeys == null) {
+                Melon<OmegabonkMod>.Logger.Error($"[{nameof(Refresh)}] itemsKeys null");
+                return;
+            }
+
+            var itemsKeysAsEnumerable = itemsKeys.Cast<Il2CppSystem.Collections.Generic.IEnumerable<EItem>>();
+            if (itemsKeysAsEnumerable == null) {
+                Melon<OmegabonkMod>.Logger.Error($"[{nameof(Refresh)}] itemsKeysAsEnumerable null");
+                return;
+            }
+
+            var itemsKeysList = new Il2CppSystem.Collections.Generic.List<EItem>(itemsKeysAsEnumerable);
+            if (itemsKeysList == null) {
+                Melon<OmegabonkMod>.Logger.Error($"[{nameof(Refresh)}] itemsKeysList null");
+                return;
+            }
+
+            var availableTomeSlots = InventoryUtility.GetNumAvailableTomeSlots();
+            var availableWeaponSlots = InventoryUtility.GetNumAvailableWeaponSlots();
+            var maxTomeSlots = InventoryUtility.GetNumMaxTomeSlots();
+            var maxWeaponSlots = InventoryUtility.GetNumMaxWeaponSlots();
+
+            var tomeContainers = instance.tomeContainers;
+            if (tomeContainers == null) {
+                Melon<OmegabonkMod>.Logger.Error($"[{nameof(Refresh)}] tomeContainers null");
+                return;
+            }
+
+            var weaponContainers = instance.weaponContainers;
+            if (weaponContainers == null) {
+                Melon<OmegabonkMod>.Logger.Error($"[{nameof(Refresh)}] weaponContainers null");
+                return;
+            }
+
+            var itemContainers = instance.itemContainers;
+            if (itemContainers == null) {
+                Melon<OmegabonkMod>.Logger.Error($"[{nameof(Refresh)}] itemContainers null");
+                return;
+            }
+
+            var itemContainerPrefab = instance.itemContainerPrefab;
+            if (itemContainerPrefab == null) {
+                Melon<OmegabonkMod>.Logger.Error($"[{nameof(Refresh)}] itemContainerPrefab null");
+                return;
+            }
+
+            var tomeParent = instance.tomeParent;
+            if (tomeParent == null) {
+                Melon<OmegabonkMod>.Logger.Error($"[{nameof(Refresh)}] tomeParent null");
+                return;
+            }
+
+            var weaponParent = instance.weaponParent;
+            if (weaponParent == null) {
+                Melon<OmegabonkMod>.Logger.Error($"[{nameof(Refresh)}] weaponParent null");
+                return;
+            }
+
+            var itemParent = instance.itemParent;
+            if (itemParent == null) {
+                Melon<OmegabonkMod>.Logger.Error($"[{nameof(Refresh)}] itemParent null");
+                return;
+            }
+
+            var dataManager = DataManager.Instance;
+            if (dataManager == null) {
+                Melon<OmegabonkMod>.Logger.Error($"[{nameof(Refresh)}] dataManager null");
+                return;
+            }
+
+            var tomeSlots = 0;
+            while (maxTomeSlots > tomeSlots) {
+                if (tomeContainers.Count <= tomeSlots) {
+                    var tomeItemContainerGameObject = GameObject.Instantiate(itemContainerPrefab, tomeParent);
+                    var tomeInventoryItemPrefabUi = tomeItemContainerGameObject.GetComponent<InventoryItemPrefabUI>();
+                    tomeContainers.Add(tomeInventoryItemPrefabUi);
+                    tomeItemContainerGameObject.SetActive(true);
+                }
+
+                var currentTomeInventoryItemPrefabUi = tomeContainers[tomeSlots];
+                if (currentTomeInventoryItemPrefabUi == null) {
+                    Melon<OmegabonkMod>.Logger.Error($"[{nameof(Refresh)}] currentTomeInventoryItemPrefabUi null");
+                    break;
+                }
+
+                var currentTomeInventoryItemPrefabUiGameObject = currentTomeInventoryItemPrefabUi.gameObject;
+                currentTomeInventoryItemPrefabUiGameObject.SetActive(true);
+
+                if (availableTomeSlots > tomeSlots) {
+                    if (tomeLevelsKeysList.Count > tomeSlots) {
+                        var eTome = tomeLevelsKeysList[tomeSlots];
+                        var tomeData = dataManager.GetTome(eTome);
+                        currentTomeInventoryItemPrefabUi.SetItem(tomeData);
+                    } else {
+                        currentTomeInventoryItemPrefabUi.SetItem(null);
+                    }
+                } else {
+                    //currentTomeInventoryItemPrefabUi.gameObject.SetActive(false);
+                    currentTomeInventoryItemPrefabUi.SetUnavailable();
+                }
+
+                tomeSlots++;
+            }
+
+            var weaponSlots = 0;
+            while (maxWeaponSlots > weaponSlots) {
+                if (weaponContainers.Count <= weaponSlots) {
+                    var weaponItemContainerGameObject = GameObject.Instantiate(itemContainerPrefab, weaponParent);
+                    var weaponInventoryItemPrefabUi = weaponItemContainerGameObject.GetComponent<InventoryItemPrefabUI>();
+                    weaponContainers.Add(weaponInventoryItemPrefabUi);
+                    weaponItemContainerGameObject.SetActive(true);
+                }
+
+                var currentWeaponInventoryItemPrefabUi = weaponContainers[weaponSlots];
+                if (currentWeaponInventoryItemPrefabUi == null) {
+                    Melon<OmegabonkMod>.Logger.Error($"[{nameof(Refresh)}] currentWeaponInventoryItemPrefabUi null");
+                    break;
+                }
+
+                var currentWeaponInventoryItemPrefabUiGameObject = currentWeaponInventoryItemPrefabUi.gameObject;
+                currentWeaponInventoryItemPrefabUiGameObject.SetActive(true);
+
+                if (availableWeaponSlots > weaponSlots) {
+                    if (weaponsValuesList.Count > weaponSlots) {
+                        var weaponBase = weaponsValuesList[weaponSlots];
+                        var weaponData = weaponBase.weaponData;
+                        currentWeaponInventoryItemPrefabUi.SetItem(weaponData);
+                    } else {
+                        currentWeaponInventoryItemPrefabUi.SetItem(null);
+                    }
+                } else {
+                    //currentTomeInventoryItemPrefabUi.gameObject.SetActive(false);
+                    currentWeaponInventoryItemPrefabUi.SetUnavailable();
+                }
+
+                weaponSlots++;
+            }
+
+            foreach (var itemInventoryItemPrefabUi in itemContainers) {
+                var itemInventoryItemPrefabUiGameObject = itemInventoryItemPrefabUi.gameObject;
+                itemInventoryItemPrefabUiGameObject.SetActive(false);
+            }
+
+            var itemSlots = 0;
+            while (itemsKeysList.Count > itemSlots) {
+                if (itemContainers.Count <= itemSlots) {
+                    var itemItemContainerGameObject = GameObject.Instantiate(itemContainerPrefab, itemParent);
+                    var itemInventoryItemPrefabUi = itemItemContainerGameObject.GetComponent<InventoryItemPrefabUI>();
+                    itemContainers.Add(itemInventoryItemPrefabUi);
+                    itemItemContainerGameObject.SetActive(true);
+                }
+
+                var currentItemInventoryItemPrefabUi = itemContainers[itemSlots];
+                if (currentItemInventoryItemPrefabUi == null) {
+                    Melon<OmegabonkMod>.Logger.Error($"[{nameof(Refresh)}] currentItemInventoryItemPrefabUi null");
+                    break;
+                }
+
+                var eItem = itemsKeysList[itemSlots];
+                currentItemInventoryItemPrefabUi.SetItem(eItem);
+                var currentItemInventoryItemPrefabUiGameObject = currentItemInventoryItemPrefabUi.gameObject;
+                currentItemInventoryItemPrefabUiGameObject.SetActive(true);
+
+                itemSlots++;
+            }
+
+            var transform = instance.transform;
+            if (transform == null) {
+                Melon<OmegabonkMod>.Logger.Error($"[{nameof(Refresh)}] transform null");
+                return;
+            }
+
+            UiUtility.RebuildUi(transform);
+        }
+    }
+
     //int ShopItemData.GetMaxLevel()
     [HarmonyPatch(typeof(ShopItemData), nameof(ShopItemData.GetMaxLevel), new Type[] { })]
     internal static class EditShopItemDataPatch1 {
@@ -546,4 +1117,23 @@ internal static class MoreTomeAndWeaponSlots {
             }
         }
     }
+
+    ////int InventoryUtility.GetNumMaxWeaponSlots()
+    //[HarmonyPatch(typeof(InventoryUtility), nameof(InventoryUtility.GetNumMaxWeaponSlots), new Type[] { })]
+    //private static class EditInventoryUtilityPatch1 {
+    //    private static void Postfix(ref int __result) {
+    //        if (!Enabled || !_dataManagerLoaded)
+    //            return;
+
+    //        //var slots = 0;
+    //        //var firstSlotUnlocked = MyAchievements.IsUnlockedInternalNameAch("a_weaponSlots");
+    //        //if (firstSlotUnlocked)
+    //        //    slots++;
+    //        //var secondSlotUnlocked = MyAchievements.IsUnlockedInternalNameAch("a_weaponSlots2");
+    //        //if (secondSlotUnlocked)
+    //        //    slots++;
+    //        //slots += AdditionalWeaponSlots;
+    //        //__result = slots;
+    //    }
+    //}
 }
