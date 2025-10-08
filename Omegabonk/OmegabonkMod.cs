@@ -4,6 +4,7 @@ using Il2CppAssets.Scripts.Actors.Player;
 using Il2CppAssets.Scripts.Inventory__Items__Pickups.Stats;
 using Il2CppAssets.Scripts.Managers;
 using Il2CppAssets.Scripts.Menu.Shop;
+using Il2CppAssets.Scripts.Steam.LeaderboardsNew;
 
 using Il2CppRewired;
 
@@ -17,7 +18,7 @@ using System.Collections.Concurrent;
 
 using UnityEngine;
 
-[assembly: MelonInfo(typeof(OmegabonkMod), "Omegabonk", "0.1.5", "skatinglasagna")]
+[assembly: MelonInfo(typeof(OmegabonkMod), "Omegabonk", "0.1.6", "skatinglasagna")]
 [assembly: MelonGame("Ved", "Megabonk")]
 
 namespace Omegabonk {
@@ -32,6 +33,8 @@ namespace Omegabonk {
             Instance = this;
 
             Preferences.Setup();
+
+            LoggerInstance.Msg($"{nameof(OmegabonkMod)} is built for Megabonk v1.0.12");
         }
 
         //public override void OnInitializeMelon() {
@@ -84,6 +87,14 @@ namespace Omegabonk {
             //if (BetterEnemyScaling.Enabled) {
             //    EnemyManager.maxNumEnemiesPooled = BetterEnemyScaling.MaxNumberOfEnemiesPooled;
             //}
+
+            var sus = Sus.Check();
+            if (sus) {
+                LoggerInstance.Warning("=== ATTENTION ===");
+                LoggerInstance.Warning("[Sus.Check, Sus.CheckMods] Megabonks internal anti-cheat found out you are sus!");
+                LoggerInstance.Warning("[Sus.Check, Sus.CheckMods] Be aware that there is a risk that you will end up being banned from the leaderboards!");
+                LoggerInstance.Warning("=================");
+            }
         }
 
         private void OnLevelInitialized() {
