@@ -128,6 +128,28 @@ namespace Omegabonk {
 
                 }
             }
+
+            //var inputPlayerHelper = ReInput.players;
+            //if (inputPlayerHelper == null)
+            //    return;
+            ////var systemInputPlayer = inputPlayerHelper.AllPlayers[0];
+            //var megabonkInputPlayer = inputPlayerHelper.AllPlayers[1];
+            //if (megabonkInputPlayer == null)
+            //    return;
+            //var controllerHelper = megabonkInputPlayer.controllers;
+            //if (controllerHelper == null)
+            //    return;
+
+            //var mouse = controllerHelper.Mouse;
+            //var keyboard = controllerHelper.Keyboard;
+
+            //if (mouse.GetButtonDownById((int)MouseInputElement.Button0)) {
+
+            //}
+
+            //if (keyboard.GetKeyDown(KeyCode.A)) {
+
+            //}
         }
 
         public override void OnDeinitializeMelon() {
